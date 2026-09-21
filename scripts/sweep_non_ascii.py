@@ -44,6 +44,7 @@ SUBSTITUTIONS = [
 
 # Files with intentional banned chars (e.g. detection dict keys)
 SKIP_FILES = {'hooks/validate-ai-first.sh', 'scripts/sweep_non_ascii.py', 'README.md'}
+SKIP_PREFIXES = ('integrations/avenox-v3/',)
 
 CODE_SPAN_RE = re.compile(r'(`+)(.+?)\1', re.DOTALL)
 FENCE_RE = re.compile(r'^[ \t]*(`{3,}|~{3,})')
@@ -164,6 +165,8 @@ def main() -> int:
 
     for path in files:
         norm = str(path).replace('\\', '/')
+        if any(norm.startswith(prefix) for prefix in SKIP_PREFIXES):
+            continue
         if any(norm == s or norm.endswith('/' + s) for s in SKIP_FILES):
             print(f'  skip   {path}  (exempted)')
             continue

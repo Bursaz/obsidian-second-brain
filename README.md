@@ -4,6 +4,12 @@
   </a>
 </p>
 
+> **This fork includes Avenox Beyin V3.2.0.** OSB remains the command,
+> research, ingestion and vault-maintenance layer; Avenox provides identity,
+> cross-session continuity, local memory, lifecycle hooks, receipts, recovery,
+> rollback, preferences, Jev and the optional global bridge. Start with the
+> [integration guide](docs/AVENOX_V3_INTEGRATION.md).
+
 <p align="center">
   <a href="#install"><img src="https://img.shields.io/badge/Claude_Code-D97757?style=for-the-badge&logo=anthropic&logoColor=white" alt="Claude Code" /></a>
   <a href="#grok-bot"><img src="https://img.shields.io/badge/Grok_Bot-000000?style=for-the-badge&logo=x&logoColor=white" alt="Grok Bot" /></a>

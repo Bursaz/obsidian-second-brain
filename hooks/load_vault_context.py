@@ -100,6 +100,18 @@ def vault_manual_path() -> Path | None:
     return claude_md if claude_md.is_file() else None
 
 
+def avenox_owns_session_context(vault: Path) -> bool:
+    """Return whether this vault has the integrated Avenox V3 runtime.
+
+    Avenox V3 owns identity, continuity, Last-Session, active Threads and its
+    source-backed context budget. Injecting the OSB manual a second time wastes
+    the host context budget and can make the two hooks disagree about which
+    state is current. OSB still publishes its skill root; only the duplicate
+    memory/manual payload is suppressed.
+    """
+    return (vault / ".beyin-runtime.json").is_file() and (vault / "beyin.py").is_file()
+
+
 def _key_files(v: Path, manual_note: str) -> str:
     """The vault header both forms share. `manual_note` says whether the manual
     below is the real thing or a pointer to it - the one line a session uses to
@@ -169,6 +181,20 @@ def main() -> int:
     sections = [skill_root_block()]
     claude_md = vault_manual_path()
     if claude_md is not None:
+        if avenox_owns_session_context(claude_md.parent):
+            sections.append(
+                "**Memory runtime**: Avenox Beyin V3 owns SessionStart identity and "
+                "continuity context for this vault. OSB remains available for commands, "
+                "research, ingestion, and vault maintenance.\n"
+            )
+            output = {
+                "hookSpecificOutput": {
+                    "hookEventName": "SessionStart",
+                    "additionalContext": "\n".join(sections),
+                }
+            }
+            json.dump(output, sys.stdout)
+            return 0
         # Characters, not bytes: the cap counts characters and a CJK manual runs
         # about three bytes to each one, so st_size would reject manuals that fit.
         text = claude_md.read_text(encoding="utf-8")

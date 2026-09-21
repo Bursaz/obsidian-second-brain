@@ -26,6 +26,7 @@ pythonpath = ["."]
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+exclude = ["integrations/avenox-v3"]
 
 # CI gates this exact set and nothing more. "F" is pyflakes: undefined names,
 # unused imports, f-strings with no placeholders - the rules that catch bugs
@@ -44,4 +45,3 @@ target-version = "py310"
 # Widening this list means fixing the backlog first, not adding a noqa sweep.
 [tool.ruff.lint]
 select = ["F", "I", "PTH"]
-
