@@ -10,6 +10,13 @@
 > rollback, preferences, Jev and the optional global bridge. Start with the
 > [integration guide](docs/AVENOX_V3_INTEGRATION.md).
 
+Create a clean combined vault through the single front door:
+
+```bash
+python brain.py install --vault /path/to/brain --name "Your Name"
+python brain.py doctor --vault /path/to/brain
+```
+
 <p align="center">
   <a href="#install"><img src="https://img.shields.io/badge/Claude_Code-D97757?style=for-the-badge&logo=anthropic&logoColor=white" alt="Claude Code" /></a>
   <a href="#grok-bot"><img src="https://img.shields.io/badge/Grok_Bot-000000?style=for-the-badge&logo=x&logoColor=white" alt="Grok Bot" /></a>

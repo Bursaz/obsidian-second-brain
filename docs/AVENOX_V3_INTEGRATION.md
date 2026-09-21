@@ -40,13 +40,26 @@ Avenox continues to read them through its own source-backed companion path.
 
 ## Install safely
 
-Always inspect the non-mutating plan first:
+For a new combined vault, use the unified front door:
+
+```bash
+python brain.py install --vault /path/to/brain --name "Your Name"
+python brain.py doctor --vault /path/to/brain
+```
+
+`brain.py doctor` reports OSB vault health and Avenox lifecycle/runtime health
+in one JSON result. Avenox runtime commands remain available through
+`brain.py avenox --vault /path/to/brain <command>`.
+
+For an existing vault, inspect the Avenox-only non-mutating plan before using
+the unified installer:
 
 ```bash
 python scripts/install_avenox_v3.py --vault /path/to/vault --plan
+python brain.py install --vault /path/to/vault
 ```
 
-Then run the same command without `--plan`. The wrapper refuses any vendored
+The wrapper refuses any vendored
 Avenox version other than the reviewed V3.2.0 pin. A production rollout must
 also run `beyin.py doctor` and verify a new cold session before declaring the
 vault migrated.
