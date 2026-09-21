@@ -879,7 +879,7 @@ tags:
   - task
 ai-first: true
 status: in-progress
-project:
+project: ""
 job:
 requested_by:
 due:
@@ -908,7 +908,7 @@ type: devlog
 tags:
   - devlog
 ai-first: true
-project:
+project: ""
 job:
 ---
 
@@ -1168,7 +1168,7 @@ type: architecture
 tags:
   - architecture
 ai-first: true
-project:
+project: ""
 ---
 
 # <% tp.file.title %>
@@ -1193,7 +1193,7 @@ type: debug
 tags:
   - debug
 ai-first: true
-project:
+project: ""
 status: investigating
 ---
 

@@ -15,6 +15,7 @@ Create a clean combined vault through the single front door:
 ```bash
 python brain.py install --vault /path/to/brain --name "Your Name"
 python brain.py doctor --vault /path/to/brain
+python brain.py context --vault /path/to/brain "what am I working on?"
 ```
 
 <p align="center">

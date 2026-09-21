@@ -47,9 +47,25 @@ python brain.py install --vault /path/to/brain --name "Your Name"
 python brain.py doctor --vault /path/to/brain
 ```
 
-`brain.py doctor` reports OSB vault health and Avenox lifecycle/runtime health
-in one JSON result. Avenox runtime commands remain available through
-`brain.py avenox --vault /path/to/brain <command>`.
+`brain.py install` installs the complete OSB command skill set locally for
+Codex/Antigravity/OpenCode and Claude, performs the first Markdown-to-memory
+sync, and reconciles the Avenox skills. A new vault is searchable and has both
+products' commands immediately. `brain.py doctor`
+reports OSB vault health and Avenox lifecycle/runtime health in one JSON result.
+
+Avenox memory features are first-class Brain commands:
+
+```bash
+python brain.py context --vault /path/to/brain "current priorities"
+python brain.py sync --vault /path/to/brain
+python brain.py preferences --vault /path/to/brain --profile economical
+python brain.py history --vault /path/to/brain RECORD_ID
+```
+
+The complete command set includes context, history, ingest, note/task creation,
+guarded task updates, receipts, preferences, skill sync/import, Jev modes,
+update, rollback and recovery. The older
+`brain.py avenox --vault /path/to/brain <command>` spelling remains compatible.
 
 For an existing vault, inspect the Avenox-only non-mutating plan before using
 the unified installer:
@@ -90,3 +106,10 @@ The integration retains and must continue to verify all of these groups:
 The imported Avenox test suite is the executable ledger. Any future Avenox
 upgrade must update the pin, review upstream changes, and pass both projects'
 test suites before merge.
+
+## Deliberately deferred
+
+Proactive runtime behavior is outside this integration stage: mailbox/calendar
+monitoring, scheduled autonomous agents, unsolicited follow-ups and automatic
+external actions will be designed separately. No Avenox V3 Brain capability is
+deferred with them.

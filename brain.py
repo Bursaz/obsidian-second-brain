@@ -4,11 +4,33 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+MEMORY_COMMANDS = (
+    "context",
+    "doctor-memory",
+    "history",
+    "ingest",
+    "jev",
+    "jev-answer",
+    "jev-memory",
+    "jev-review",
+    "note-create",
+    "preferences",
+    "receipt",
+    "recover",
+    "rollback",
+    "skill-import",
+    "skill-sync",
+    "sync",
+    "task-create",
+    "task-update",
+    "update",
+)
 
 
 def run_json(command: list[str]) -> dict:
@@ -48,6 +70,25 @@ def combined_doctor(vault: Path) -> dict:
     }
 
 
+def install_osb_skills(vault: Path) -> dict:
+    build = subprocess.run(
+        ["bash", str(ROOT / "scripts" / "build.sh"), "--platform", "agent-skills"],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if build.returncode != 0:
+        raise RuntimeError(build.stderr.strip() or build.stdout.strip())
+    source = ROOT / "dist" / "agent-skills" / "skills"
+    names = sorted(path.name for path in source.iterdir() if path.is_dir())
+    for destination in (vault / ".agents" / "skills", vault / ".claude" / "skills"):
+        destination.mkdir(parents=True, exist_ok=True)
+        for name in names:
+            shutil.copytree(source / name, destination / name, dirs_exist_ok=True)
+    return {"status": "installed", "count": len(names), "skills": names}
+
+
 def install(args: argparse.Namespace) -> dict:
     vault = args.vault.expanduser().resolve()
     if not vault.exists() or not (vault / "_CLAUDE.md").is_file():
@@ -69,6 +110,7 @@ def install(args: argparse.Namespace) -> dict:
         if created.returncode != 0:
             raise RuntimeError(created.stderr.strip() or created.stdout.strip())
 
+    osb_skills = install_osb_skills(vault)
     command = [
         sys.executable,
         str(ROOT / "scripts" / "install_avenox_v3.py"),
@@ -78,7 +120,19 @@ def install(args: argparse.Namespace) -> dict:
     if args.state:
         command.extend(["--state", str(args.state.expanduser().resolve())])
     installed = run_json(command)
-    return {"status": "installed", "install": installed, "doctor": combined_doctor(vault)}
+    memory_sync = avenox(vault, ["sync"])
+    skill_sync = avenox(vault, ["skill-sync"])
+    doctor = combined_doctor(vault)
+    if memory_sync.get("status") != "succeeded" or skill_sync.get("conflicts"):
+        doctor["status"] = "needs_attention"
+    return {
+        "status": "installed" if doctor["status"] == "healthy" else "needs_attention",
+        "install": installed,
+        "osb_skills": osb_skills,
+        "memory_sync": memory_sync,
+        "skill_sync": skill_sync,
+        "doctor": doctor,
+    }
 
 
 def parser() -> argparse.ArgumentParser:
@@ -102,18 +156,44 @@ def parser() -> argparse.ArgumentParser:
     runtime = sub.add_parser("avenox", help="Run an installed Avenox command")
     runtime.add_argument("--vault", required=True, type=Path)
     runtime.add_argument("arguments", nargs=argparse.REMAINDER)
+    for command in MEMORY_COMMANDS:
+        direct = sub.add_parser(command, help=f"Run the integrated Avenox {command} command")
+        direct.add_argument("--vault", required=True, type=Path)
+        direct.add_argument("arguments", nargs=argparse.REMAINDER)
     return root
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = parser().parse_args(argv)
+    raw = list(sys.argv[1:] if argv is None else argv)
+    argument_parser = parser()
+    args, extra = argument_parser.parse_known_args(raw)
+    passthrough = args.command == "avenox" or args.command in MEMORY_COMMANDS
+    if extra and not passthrough:
+        argument_parser.error("unrecognized arguments: " + " ".join(extra))
+    if passthrough:
+        forwarded: list[str] = []
+        index = 1
+        while index < len(raw):
+            value = raw[index]
+            if value == "--vault":
+                index += 2
+                continue
+            if value.startswith("--vault="):
+                index += 1
+                continue
+            forwarded.append(value)
+            index += 1
+        args.arguments = forwarded
     try:
         if args.command == "install":
             result = install(args)
         elif args.command == "doctor":
             result = combined_doctor(args.vault.expanduser().resolve())
-        else:
+        elif args.command == "avenox":
             result = avenox(args.vault.expanduser().resolve(), args.arguments or ["doctor"])
+        else:
+            command = "doctor" if args.command == "doctor-memory" else args.command
+            result = avenox(args.vault.expanduser().resolve(), [command, *args.arguments])
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
     except Exception as exc:
