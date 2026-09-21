@@ -6,6 +6,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from scripts.vault_health import load_vault, load_vault_config, run_health_check
+
 ROOT = Path(__file__).resolve().parents[1]
 HOOK = ROOT / "hooks" / "load_vault_context.py"
 
@@ -52,3 +54,39 @@ def test_install_front_door_supports_non_mutating_plan(tmp_path):
     assert report["status"] == "plan"
     assert report["version"] == "3.2.0"
     assert not (vault / "beyin.py").exists()
+
+
+def test_clean_hybrid_vault_has_no_system_file_health_noise(tmp_path):
+    vault = tmp_path / "vault"
+    state = tmp_path / "state"
+    vault.mkdir()
+    state.mkdir()
+    (vault / "_CLAUDE.md").write_text("# Vault manual\n", encoding="utf-8")
+    (vault / "Home.md").write_text("---\ntype: index\ndate: 2026-09-21\ntags: [index]\nai-first: true\n---\n", encoding="utf-8")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/install_avenox_v3.py"),
+            "--vault",
+            str(vault),
+            "--state",
+            str(state),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+
+    excludes = load_vault_config(vault)
+    notes = load_vault(vault, excludes)
+    assert "CLAUDE.md" not in notes
+    assert not any(path.startswith("🔮 850-Companion/") for path in notes)
+    findings = run_health_check(vault)["issues"]
+    noisy = [
+        finding
+        for finding in findings
+        if any("850-Companion" in file or file == "CLAUDE.md" for file in finding.get("files", []))
+    ]
+    assert noisy == []

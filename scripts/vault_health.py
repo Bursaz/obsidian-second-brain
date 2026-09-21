@@ -51,7 +51,7 @@ EXCLUDE_DIRS = frozenset(d.lower() for d in BASE_EXCLUDE_DIRS)
 # The file index deliberately keeps Templates visible: a link pointing AT a
 # template should still resolve, even though templates are not scanned as notes.
 FILE_INDEX_EXCLUDE_DIRS = EXCLUDE_DIRS - {"templates"}
-EXCLUDE_ROOT_FILES = {"AGENTS.md", "INSTALL.md"}
+EXCLUDE_ROOT_FILES = {"AGENTS.md", "CLAUDE.md", "INSTALL.md"}
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---", re.DOTALL)
 # A note whose entire body was accidentally saved inside a ```markdown code fence:
 # the first non-blank line opens a fence and the real frontmatter (---) lives INSIDE it.

@@ -40,7 +40,7 @@ _NOTES_DIR = "Inbox"
 # tests/test_exclude_policy.py pins the two together so they cannot drift again.
 _SKIP_DIRS = {".obsidian", ".git", ".trash", "_trash", ".claude", "_export",
               "templates", "node_modules", ".agents", ".codex", ".gemini",
-              ".opencode", "__pycache__"}
+              ".opencode", "__pycache__", "🔮 850-companion"}
 
 # Directories no write tool may touch. `raw/` holds original sources the skill
 # treats as immutable, and `templates` needs to match the conventional capital-T

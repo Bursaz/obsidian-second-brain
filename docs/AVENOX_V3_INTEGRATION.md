@@ -34,6 +34,10 @@ runtime and suppresses its duplicate manual payload. It still publishes the OSB
 skill root, so OSB commands remain usable. Avenox is the single owner of memory
 context for that vault.
 
+The default `🔮 850-Companion/` directory and Avenox's root `CLAUDE.md` are
+system surfaces. OSB health, link, freshness and search scans exclude them;
+Avenox continues to read them through its own source-backed companion path.
+
 ## Install safely
 
 Always inspect the non-mutating plan first:

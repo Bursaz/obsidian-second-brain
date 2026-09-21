@@ -49,6 +49,10 @@ BASE_EXCLUDE_DIRS: frozenset[str] = frozenset({
     ".codex",
     ".gemini",
     ".opencode",
+    # Avenox V3 owns these identity/continuity sources and injects them through
+    # its bounded companion context. OSB scanning them again creates duplicate
+    # search results and reports system files as ordinary vault notes.
+    "🔮 850-companion",
     # note templates. Scanned, they duplicate every real note's structure.
     # Spelled capital-T by the bootstrapper and lowercase by three tools, hence
     # the case-insensitive matching below.
